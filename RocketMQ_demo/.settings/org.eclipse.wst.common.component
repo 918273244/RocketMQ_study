@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="RocketMQ_demo">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="rocketmq-client-3.2.6.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rocketmq-client/rocketmq-client">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="rocketmq-common-3.2.6.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rocketmq-common/rocketmq-common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="rocketmq-remoting-3.2.6.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rocketmq-remoting/rocketmq-remoting">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="RocketMQ_demo"/>
+        <property name="java-output-path" value="/RocketMQ_demo/target/classes"/>
+    </wb-module>
+</project-modules>
