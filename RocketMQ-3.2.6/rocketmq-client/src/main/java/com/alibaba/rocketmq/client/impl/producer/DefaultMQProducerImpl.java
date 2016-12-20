@@ -476,12 +476,15 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             final CommunicationMode communicationMode,//
             final SendCallback sendCallback, final long timeout//
     ) throws MQClientException, RemotingException, MQBrokerException, InterruptedException {
+    	//检查Producer的状态是否是RUNNING
         this.makeSureStateOK();
+        //检查msg是否合法：是否为null、topic,body是否为空、body是否超长
         Validators.checkMessage(msg, this.defaultMQProducer);
 
         final long maxTimeout = this.defaultMQProducer.getSendMsgTimeout() + 1000;
         final long beginTimestamp = System.currentTimeMillis();
         long endTimestamp = beginTimestamp;
+        //获取topic的路由信息，tryToFindTopicPublishInfo获取路由信息，我们直到Producer初始化的时候会将Topic的路由信息缓存到本地，如果本地没有Topic再去发送请求Topic的路由信息
         TopicPublishInfo topicPublishInfo = this.tryToFindTopicPublishInfo(msg.getTopic());
         if (topicPublishInfo != null && topicPublishInfo.ok()) {
             MessageQueue mq = null;
@@ -492,11 +495,13 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             String[] brokersSent = new String[timesTotal];
             for (; times < timesTotal && (endTimestamp - beginTimestamp) < maxTimeout; times++) {
                 String lastBrokerName = null == mq ? null : mq.getBrokerName();
+                //从路由信息中选取一个队列，这个方法也是实现负载均衡的策略
                 MessageQueue tmpmq = topicPublishInfo.selectOneMessageQueue(lastBrokerName);
                 if (tmpmq != null) {
                     mq = tmpmq;
                     brokersSent[times] = mq.getBrokerName();
                     try {
+                    	//将消息发到该队列上
                         sendResult = this.sendKernelImpl(msg, mq, communicationMode, sendCallback, timeout);
                         endTimestamp = System.currentTimeMillis();
                         switch (communicationMode) {
@@ -922,12 +927,15 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_PRODUCER_GROUP,
             this.defaultMQProducer.getProducerGroup());
         try {
+        	//逻辑代码，非实际代码
+            //1.发送消息
             sendResult = this.send(msg);
         }
         catch (Exception e) {
             throw new MQClientException("send message Exception", e);
         }
-
+        
+        //默认的就是LocalTransactionState.UNKNOW
         LocalTransactionState localTransactionState = LocalTransactionState.UNKNOW;
         Throwable localException = null;
         switch (sendResult.getSendStatus()) {
@@ -936,6 +944,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                 if (sendResult.getTransactionId() != null) {
                     msg.putUserProperty("__transactionId__",sendResult.getTransactionId());
                 }
+                //2.如果消息发送成功，处理与消息关联的本地事务单元
                 localTransactionState = tranExecuter.executeLocalTransactionBranch(msg, arg);
                 if (null == localTransactionState) {
                     localTransactionState = LocalTransactionState.UNKNOW;
@@ -963,6 +972,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         }
 
         try {
+        	//结束事务，endTransaction方法会将请求发往broker(mq server)去更新事物消息的最终状态：
             this.endTransaction(sendResult, localTransactionState, localException);
         }
         catch (Exception e) {

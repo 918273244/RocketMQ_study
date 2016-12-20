@@ -103,7 +103,7 @@ public class Validators {
 
 
     /**
-     * Validate message
+     * 校验消息
      *
      * @param msg
      * @param defaultMQProducer
@@ -111,20 +111,23 @@ public class Validators {
      */
     public static void checkMessage(Message msg, DefaultMQProducer defaultMQProducer)
             throws MQClientException {
+    	//是否为null
         if (null == msg) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL, "the message is null");
         }
-        // topic
+        //校验topic
         Validators.checkTopic(msg.getTopic());
-        // body
+        //校验body是否为null
         if (null == msg.getBody()) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL, "the message body is null");
         }
-
+         
+        //校验长度
         if (0 == msg.getBody().length) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL, "the message body length is zero");
         }
-
+        
+        //校验长度是不是大于自己设置的醉倒长度
         if (msg.getBody().length > defaultMQProducer.getMaxMessageSize()) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL,
                     "the message body size over max value, MAX: " + defaultMQProducer.getMaxMessageSize());
