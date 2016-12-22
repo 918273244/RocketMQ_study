@@ -7,7 +7,7 @@ import com.alibaba.rocketmq.common.message.Message;
 
 public class Producer {
 	 public static void main(String[] args) throws MQClientException, InterruptedException {
-		   //quickstart_producer
+		    //quickstart_producer这个是ground Name全局唯一，就是一个web项目要唯一
 	        DefaultMQProducer producer = new DefaultMQProducer("quickstart_producer");
 	        producer.setNamesrvAddr("192.168.5.121:9876;192.168.5.122:9876");
 	        //这个校验会在send方法中校验
@@ -37,7 +37,7 @@ public class Producer {
 	        for (int i = 0; i < 10; i++) {
 	            try {
 	                Message msg = new Message("TopicTest",// topic
-	                    "TagA",//tag,杩囨护鏉′欢
+	                    "TagA",//tag,过滤条件
 	                    ("Hello RocketMQ " + i).getBytes()// body
 	                        );
 	                SendResult sendResult = producer.send(msg);
