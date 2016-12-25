@@ -165,17 +165,20 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         switch (this.serviceState) {
         case CREATE_JUST:
             this.serviceState = ServiceState.START_FAILED;
-
+            
+            //校验ground Name
             this.checkConfig();
 
             if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
                 this.defaultMQProducer.changeInstanceNameToPID();
             }
-
+            
+            //创建一个MQ工厂类
             this.mQClientFactory =
                     MQClientManager.getInstance().getAndCreateMQClientInstance(this.defaultMQProducer,
                         rpcHook);
-
+            
+            //producerTable注册生产方的用户组和Producer
             boolean registerOK =
                     mQClientFactory.registerProducer(this.defaultMQProducer.getProducerGroup(), this);
             if (!registerOK) {
@@ -184,11 +187,12 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         + "] has been created before, specify another name please."
                         + FAQUrl.suggestTodo(FAQUrl.GROUP_NAME_DUPLICATE_URL), null);
             }
-
+            
             this.topicPublishInfoTable
                 .put(this.defaultMQProducer.getCreateTopicKey(), new TopicPublishInfo());
 
             if (startFactory) {
+            	//这个就是对应的一些Service的start
                 mQClientFactory.start();
             }
 
@@ -210,6 +214,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
 
     private void checkConfig() throws MQClientException {
+    	//校验groupname
         Validators.checkGroup(this.defaultMQProducer.getProducerGroup());
 
         if (null == this.defaultMQProducer.getProducerGroup()) {

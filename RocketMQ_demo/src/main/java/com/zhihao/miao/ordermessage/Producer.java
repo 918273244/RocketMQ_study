@@ -31,6 +31,11 @@ import com.alibaba.rocketmq.remoting.exception.RemotingException;
 
 /**
  * Producer，发送顺序消息
+  * Producer，发送顺序消息
+ * 一个订单产生了 3 条消息，分别是订单创建、订单付款、订单完成。消费时，要按照这个顺序消费才有意义。但同时订单之间又是可以并行消费的。
+ * 
+ * 所有消息都是放在一个Topic下，只是不同的需要顺序消费的消息放在同一个队列，并且同一个队列中的消息还要推送到同一个Broker（也就是节点的意思），并且同一个队列（需要顺序消费的消息也需要推送到
+ * 同一个消费端）这样就保证了消息的顺序消费 
  */
 public class Producer {
 	
